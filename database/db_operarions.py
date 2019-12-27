@@ -1,18 +1,17 @@
 import sqlite3
 
+from db import get_db
 
-class DbOperations:
-    db_name = "data.db"
 
+class DbManager:
     @staticmethod
-    def connect_and_execute_query(query):
-        connection = sqlite3.connect('data.db')
-        connection.row_factory = sqlite3.Row
+    def execute_query(query):
+        connection = get_db()
+
         cursor = connection.cursor()
         result = cursor.execute(query)
-        connection.commit()
-        return result,connection
 
-    @staticmethod
-    def close_connection(connection):
-        connection.close()
+        connection.commit()
+
+        return result
+

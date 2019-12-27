@@ -9,5 +9,6 @@ class DiaryController:
     @staticmethod
     @diary.route('/api/event', methods=['GET'])
     def get_all():
+
         schema = DiaryEventSchema()
         return jsonify({'events':schema.dump(DiaryEventDb.get_all(), many=True)})
