@@ -1,6 +1,5 @@
-from datetime import datetime
+
 from typing import Dict, Optional, List
-import sqlite3
 from database.db_operarions import DbManager
 from models.event import DiaryEvent
 from dateutil.parser import parse
@@ -42,7 +41,4 @@ class DiaryEventDb:
 
         return DiaryEventDb.get(updated_event.id)
 
-    @classmethod
-    def search(cls, start: Optional[datetime], end: Optional[datetime], content: Optional[str]):
-        # build query by parameters
-        query = 'SELECT * FROM events WHERE description LIKE \'%?%\' AND date(date) BETWEEN date(?) AND date(?)'
+
