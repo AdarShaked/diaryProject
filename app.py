@@ -9,7 +9,7 @@ def create_app(test_config=None):
     app = Flask(__name__)
 
     app.register_blueprint(diary)
-    app.register_blueprint(search)
+    # app.register_blueprint(search)
 
     app.config.from_mapping(
         DATABASE=os.path.join(app.root_path, "data.db")

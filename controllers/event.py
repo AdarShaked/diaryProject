@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, Response
+from flask import Blueprint, jsonify, request
 from marshmallow import ValidationError
 from schema.event import DiaryEventSchema
 from database.event import DiaryEventDb
@@ -68,4 +68,12 @@ class DiaryController:
         except ValidationError as e:
             return jsonify({"error": e.messages}), 400
 
-
+    @staticmethod
+    @diary.route('/api/event/<int:event_id>', methods=['DELETE'])
+    def delete_event(event_id: int):
+        event = DiaryEventDb.get(event_id)
+        if event is None:
+            return jsonify({"error": "event not found"}), 404
+        DiaryEventDb.delete(event_id)
+        # if we deleted succesfully - 204-no content
+        return "", 204

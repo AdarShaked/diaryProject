@@ -1,9 +1,7 @@
 import pytest
-import os
 from datetime import datetime
 from dateutil.parser import parse
 from flask import Response, jsonify
-import json
 
 from db import init_db, get_db
 from models.event import DiaryEvent
@@ -14,6 +12,18 @@ def add_event_to_db(event):
     add_event = "INSERT INTO events(title,description,date) values (?,?,?)"
     db.execute(add_event, (event.title, event.description, event.date))
     db.commit()
+
+
+def insert_three_events_to_db():
+    event_to_insert = DiaryEvent(title="event1", description="this is just a description",
+                                 date=datetime(2019, 1, 20))
+    add_event_to_db(event_to_insert)
+    event_to_insert = DiaryEvent(title="event2", description="this is just a description",
+                                 date=datetime(2012, 1, 20))
+    add_event_to_db(event_to_insert)
+    event_to_insert = DiaryEvent(title="event3", description="this is just a description",
+                                 date=datetime(2014, 1, 20))
+    add_event_to_db(event_to_insert)
 
 
 def test_get_all(client, app):
@@ -154,3 +164,26 @@ def test_put(client, app):
         assert json_returned['error'] == "id conflict between url and body"
 
 
+def test_delete(client, app):
+    with app.app_context():
+        insert_three_events_to_db()
+        response: Response = client.delete("/api/event/2")
+        assert response.status_code == 204
+        response: Response = client.delete("/api/event/2")
+        assert response.status_code == 404
+        response: Response = client.get("/api/event/2")
+        assert response.status_code == 404
+
+        response: Response = client.get("/api/event")
+        assert response.status_code == 200
+        assert response.is_json == True
+        events = response.get_json()['events']
+        assert len(events) == 2
+
+        response: Response = client.delete("/api/event/1")
+        assert response.status_code == 204
+        response: Response = client.get("/api/event")
+        assert response.status_code == 200
+        assert response.is_json == True
+        events = response.get_json()['events']
+        assert len(events) == 1
