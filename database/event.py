@@ -7,19 +7,27 @@ from dateutil.parser import parse
 
 
 class DiaryEventDb:
-    @staticmethod
-    def get_all() -> List[DiaryEvent]:
-        query = "SELECT * FROM events"
+    table_name ='events'
+    @classmethod
+    def get_all(cls) -> List[DiaryEvent]:
+        query = "SELECT * FROM {table}".format(table=cls.table_name)
         result = DbManager.execute_query(query)
         events = []
         for row in result.fetchall():
             events.append(DiaryEvent(row['id'], row['title'], row['description'], parse(row['date'])))
         return events
 
-    @staticmethod
-    def get(event_id: int) -> Optional[DiaryEvent]:
-        query = "SELECT * FROM events WHERE id=?"
+    @classmethod
+    def get(cls,event_id: int) -> Optional[DiaryEvent]:
+        query = "SELECT * FROM {table} WHERE id=?".format(table=cls.table_name)
         result = DbManager.execute_query_with_params(query, (event_id,))
         row = result.fetchone()
         if row:
             return DiaryEvent(row['id'], row['title'], row['description'], parse(row['date']))
+
+    @classmethod
+    def add(cls, event: DiaryEvent)->DiaryEvent:
+        query ="INSERT INTO {table}(title,description,date) values (?,?,?)".format(table=cls.table_name)
+        result = DbManager.execute_query_with_params(query, (event.title,event.description,event.date))
+
+        return DiaryEvent(result.lastrowid, event.title,event.description,event.date)

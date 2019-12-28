@@ -9,8 +9,9 @@ def create_app(test_config=None):
     app = Flask(__name__)
     app.register_blueprint(diary)
 
+
     app.config.from_mapping(
-        DATABASE=os.path.join(app.instance_path, "data.db")
+        DATABASE=os.path.join(app.root_path, "data.db")
     )
 
     if test_config:
@@ -22,5 +23,4 @@ def create_app(test_config=None):
 
 
 if __name__ == '__main__':
-    print("not here")
     app.run(port=5000, debug=False)
