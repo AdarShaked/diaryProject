@@ -13,7 +13,13 @@ class DiaryEventDb:
         result = DbManager.execute_query(query)
         events = []
         for row in result.fetchall():
-            print(dict(row))
             events.append(DiaryEvent(row['id'], row['title'], row['description'], parse(row['date'])))
-
         return events
+
+    @staticmethod
+    def get(event_id: int) -> Optional[DiaryEvent]:
+        query = "SELECT * FROM events WHERE id=?"
+        result = DbManager.execute_query_with_params(query, (event_id,))
+        row = result.fetchone()
+        if row:
+            return DiaryEvent(row['id'], row['title'], row['description'], parse(row['date']))
