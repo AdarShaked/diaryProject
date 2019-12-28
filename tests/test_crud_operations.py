@@ -62,7 +62,7 @@ def test_get_by_id(client, app):
         assert response.status_code == 404
 
 
-def test_put(client, app):
+def test_post(client, app):
     with app.app_context():
         event_to_insert = DiaryEvent(title="post_event", description="this is just a description",
                                      date=datetime(2019, 1, 20))
@@ -77,7 +77,7 @@ def test_put(client, app):
             'description': event_to_insert.description,
             'date': str(event_to_insert.date)
         }
-        response: Response = client.post("/api/event", json=data,headers=headers)
+        response: Response = client.post("/api/event", json=data, headers=headers)
         assert response.status_code == 200
         assert response.is_json == True
         event_returned = response.get_json()
@@ -103,17 +103,54 @@ def test_put(client, app):
         assert event_returned['description'] == event_to_insert.description
         assert event_returned["id"] == 2
 
-        #put bad requests
+        # put bad requests
         data = {
             'title': event_to_insert.title,
             'description': event_to_insert.description,
             'date': str(event_to_insert.date),
-            'id':5
+            'id': 5
         }
         response: Response = client.post("/api/event", json=data, headers=headers)
         assert response.status_code == 400
         assert response.is_json == True
-        assert response.get_json()['error'] =="cant put event with id"
+        assert response.get_json()['error'] == "cant put event with id"
 
+
+def test_put(client, app):
+    with app.app_context():
+        event_to_insert = DiaryEvent(title="put_event", description="this is just a description",
+                                     date=datetime(2019, 1, 20))
+        add_event_to_db(event_to_insert)
+        mimetype = 'application/json'
+        headers = {
+            'Content-Type': mimetype,
+            'Accept': mimetype
+        }
+        data = {
+            'title': "updated_title",
+            'description': "updated_description",
+            'date': str(event_to_insert.date)
+        }
+        response: Response = client.put("/api/event/1", json=data, headers=headers)
+        assert response.status_code == 200
+        assert response.is_json == True
+        event_returned = response.get_json()
+        assert event_returned['title'] == data['title']
+        assert parse(event_returned['date']) == event_to_insert.date
+        assert event_returned['description'] == data['description']
+        assert event_returned["id"] == 1
+
+        # trying to update an event that not exists
+        response: Response = client.put("/api/event/2", json=data, headers=headers)
+        assert response.status_code == 404
+        assert response.is_json == True
+
+        # conflicting ids
+        data.update({'id': 2})
+        response: Response = client.put("/api/event/1", json=data, headers=headers)
+        assert response.status_code == 400
+        assert response.is_json == True
+        json_returned = response.get_json()
+        assert json_returned['error'] == "id conflict between url and body"
 
 

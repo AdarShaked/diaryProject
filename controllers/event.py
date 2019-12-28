@@ -42,3 +42,30 @@ class DiaryController:
 
         except ValidationError as e:
             return jsonify({"error": e.messages}), 400
+
+    # assumig that if the event doesent exsits its fault
+    # assuming if the body dont have is event_id is from url
+    @staticmethod
+    @diary.route('/api/event/<int:event_id>', methods=['PUT'])
+    def update_event(event_id: int):
+        try:
+            if not request.is_json:
+                return jsonify({"error": "please provide data in json format"}), 400
+
+            if DiaryEventDb.get(event_id) is None:
+                return jsonify({"error": "event not found"}), 404
+
+            schema = DiaryEventSchema()
+            updated_event: DiaryEvent = schema.load(request.json)
+            if updated_event.id is None:
+                updated_event.id = event_id
+
+            if updated_event.id != event_id:
+                return jsonify({"error": "id conflict between url and body"}), 400
+
+            return jsonify(schema.dump(DiaryEventDb.update(updated_event)))
+
+        except ValidationError as e:
+            return jsonify({"error": e.messages}), 400
+
+
