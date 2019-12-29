@@ -1,3 +1,5 @@
+from typing import List, Dict
+
 import pytest
 from datetime import datetime
 from dateutil.parser import parse
@@ -15,15 +17,21 @@ def add_event_to_db(event):
 
 
 def insert_three_events_to_db():
-    event_to_insert = DiaryEvent(title="event1", description="this is just a description",
-                                 date=datetime(2019, 1, 20))
-    add_event_to_db(event_to_insert)
-    event_to_insert = DiaryEvent(title="event2", description="this is just a description",
-                                 date=datetime(2012, 1, 20))
-    add_event_to_db(event_to_insert)
-    event_to_insert = DiaryEvent(title="event3", description="this is just a description",
-                                 date=datetime(2014, 1, 20))
-    add_event_to_db(event_to_insert)
+    list_of_events: List[DiaryEvent] = []
+    list_of_events.append(DiaryEvent(title="event1", description="this is just a description",
+                                     date=datetime(2019, 1, 20)))
+    list_of_events.append(DiaryEvent(title="event2", description="this is just a description",
+                                     date=datetime(2012, 1, 20)))
+
+    list_of_events.append(DiaryEvent(title="event3", description="this is just a description",
+                                     date=datetime(2014, 1, 20)))
+
+    add_events_to_db(list_of_events)
+
+
+def add_events_to_db(events_list: List[DiaryEvent]):
+    for event in events_list:
+        add_event_to_db(event)
 
 
 def test_get_all(client, app):

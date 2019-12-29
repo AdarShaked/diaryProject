@@ -7,36 +7,40 @@ from models.search import DiarySearch
 
 
 class DiarySearchDb:
-    table_name = 'events'
+    _table_name = 'events'
 
     @classmethod
     def search(cls, search_obj: DiarySearch) -> List[DiaryEvent]:
-        # build query by parameters
-        if search_obj.content:
-            if search_obj.start_date and search_obj.start_date:
-                res = cls.search_by_content_and_dates(search_obj)
-            else:
-                res = cls.search_by_content(search_obj.content)
-        else:
-            res = cls.search_by_dates(search_obj.start_date, search_obj.end_date)
-
+        res = cls._get_search_result(search_obj)
         return DbManager.create_list_of_events_from_query_result(res)
 
     @classmethod
+    def _get_search_result(cls, search_obj):
+        # build query by parameters
+        if search_obj.content:
+            if search_obj.start_date and search_obj.end_date:
+                return cls.search_by_content_and_dates(search_obj)
+
+            return cls.search_by_content(search_obj.content)
+
+        return cls.search_by_dates(search_obj.start_date, search_obj.end_date)
+
+    @classmethod
     def search_by_content_and_dates(cls, search_obj: DiarySearch):
-        query = "SELECT * FROM {table} WHERE description LIKE \'%{content}%\' AND (date BETWEEN ? AND ?)".format(
-            table=cls.table_name, content=search_obj.content)
+        query = "SELECT * FROM {table} WHERE description LIKE ? AND (date BETWEEN ? AND ?)".format(
+            table=cls._table_name)
         return DbManager.execute_query_with_params(query,
-                                                   (search_obj.start_date, search_obj.end_date))
+                                                   ("%{content}%".format(content=search_obj.content),
+                                                    search_obj.start_date, search_obj.end_date))
 
     @classmethod
     def search_by_content(cls, content: str):
-        query = "SELECT * FROM {table} WHERE description LIKE \'%{content}%\'".format(table=cls.table_name,
-                                                                                      content=content)
-        return DbManager.execute_query(query)
+        query = "SELECT * FROM {table} WHERE description LIKE ?".format(table=cls._table_name)
+
+        return DbManager.execute_query_with_params(query, ("%{content}%".format(content=content),))
 
     @classmethod
     def search_by_dates(cls, start_date: datetime, end_date: datetime):
-        query = "SELECT * FROM {table} WHERE  date BETWEEN ? AND ?".format(table=cls.table_name)
+        query = "SELECT * FROM {table} WHERE  date BETWEEN ? AND ?".format(table=cls._table_name)
         return DbManager.execute_query_with_params(query,
                                                    (start_date, end_date))
