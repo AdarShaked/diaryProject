@@ -1,9 +1,9 @@
 import pytest
 from datetime import datetime
 from dateutil.parser import parse
-from flask import Response, jsonify
+from flask import Response
 
-from db import init_db, get_db
+from db import get_db
 from models.event import DiaryEvent
 
 

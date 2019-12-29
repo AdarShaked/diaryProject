@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 from marshmallow import ValidationError
+
 from schema.event import DiaryEventSchema
 from database.event import DiaryEventDb
 from models.event import DiaryEvent

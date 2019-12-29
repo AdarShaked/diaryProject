@@ -7,7 +7,6 @@ class SearchEventSchema(Schema):
     start_date = fields.DateTime()
     end_date = fields.DateTime()
 
-
     @post_load
     def make_diary_search(self, data, **kwargs):
         return DiarySearch(**data)

@@ -1,10 +1,8 @@
 import os
 import tempfile
-
 import pytest
 
 from app import create_app
-from db import get_db
 from db import init_db
 
 

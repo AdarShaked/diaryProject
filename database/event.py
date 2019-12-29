@@ -1,7 +1,8 @@
-from typing import Dict, Optional, List
+from typing import Optional, List
+from dateutil.parser import parse
+
 from database.db_operarions import DbManager
 from models.event import DiaryEvent
-from dateutil.parser import parse
 
 
 class DiaryEventDb:
@@ -11,10 +12,7 @@ class DiaryEventDb:
     def get_all(cls) -> List[DiaryEvent]:
         query = "SELECT * FROM {table}".format(table=cls._events_table_name)
         result = DbManager.execute_query(query)
-        events = []
-        for row in result.fetchall():
-            events.append(DiaryEvent(row['id'], row['title'], row['description'], parse(row['date'])))
-        return events
+        return DbManager.create_list_of_events_from_query_result(result)
 
     @classmethod
     def get(cls, event_id: int) -> Optional[DiaryEvent]:
@@ -26,7 +24,7 @@ class DiaryEventDb:
 
     @classmethod
     def add(cls, event: DiaryEvent) -> DiaryEvent:
-        query = "INSERT INTO {table}(title,description,date) values (?,?,?)".format(table=cls._events_table_name)
+        query = "INSERT INTO {table}(title,description,date) values (?,?,date(?))".format(table=cls._events_table_name)
         result = DbManager.execute_query_with_params(query, (event.title, event.description, event.date))
 
         return DiaryEvent(result.lastrowid, event.title, event.description, event.date)
